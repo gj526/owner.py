@@ -1,13 +1,13 @@
 import instaloader
 import yt_dlp
 import requests
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, CallbackContext
 
-# ضع التوكن الخاص بك هنا
-TOKEN = "7643506771:AAFWaCyi7C_hynna2_xEtHKByVeQPjeEBHM"
+TOKEN = "PUT-YOUR-TOKEN-HERE"
 
-# تحميل مكتبة Instaloader
+app = Flask(__name__)
 loader = instaloader.Instaloader()
 
 def get_instagram_info(username):
@@ -65,15 +65,22 @@ async def handle_message(update: Update, context: CallbackContext):
         video_url = download_video(text)
         await update.message.reply_text(f"📥 رابط التحميل: {video_url}")
 
-def main():
-    app = Application.builder().token(TOKEN).build()
+def run_bot():
+    bot_app = Application.builder().token(TOKEN).build()
     
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    bot_app.add_handler(CommandHandler("start", start))
+    bot_app.add_handler(CallbackQueryHandler(button_handler))
+    bot_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("✅ البوت يعمل الآن...")
-    app.run_polling()
+    bot_app.run_polling()
+
+import threading
+threading.Thread(target=run_bot).start()
+
+@app.route("/")
+def home():
+    return "البوت يعمل بنجاح على Railway 🚀"
 
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=5000)
